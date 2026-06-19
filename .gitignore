@@ -5,3 +5,9 @@ dist/
 .DS_Store
 *.local
 .vite/
+
+# Documents PDF générés au runtime (régénérés au démarrage / à la réservation)
+server/storage/
+
+# Données PostgreSQL locales
+.pgdata/

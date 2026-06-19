@@ -1,7 +1,6 @@
 /* Écosystème : annuaire des partenaires + candidature (compte connecté Stripe). */
 import { Router } from 'express'
-import { nanoid } from 'nanoid'
-import { db } from '../store.js'
+import { store } from '../store.js'
 import { createConnectedAccount } from '../services/payments.js'
 
 const router = Router()
@@ -28,10 +27,9 @@ router.post('/apply', async (req, res) => {
     return res.status(400).json({ error: 'raison sociale, email et type requis' })
   }
   const account = await createConnectedAccount({ email, businessName })
-  const application = {
-    id: nanoid(10), businessName, email, type, status: 'reviewing',
-    stripeAccountId: account.id, createdAt: Date.now(),
-  }
+  const application = await store.partners.apply({
+    kind: type, company: businessName, email, status: 'reviewing', stripeAccountId: account.id,
+  })
   res.status(201).json({ application, onboardingUrl: account.onboardingUrl })
 })
 

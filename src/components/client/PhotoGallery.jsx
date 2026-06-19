@@ -31,7 +31,7 @@ export default function PhotoGallery({ views, label }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
-              <CarVisual accent={views[active].accent} view={views[active].view} label={label} />
+              <CarVisual accent={views[active].accent} view={views[active].view} src={views[active].src} label={label} />
             </motion.div>
           </AnimatePresence>
           <span className="gallery__expand"><Expand size={16} aria-hidden="true" /> Voir en grand</span>
@@ -47,7 +47,7 @@ export default function PhotoGallery({ views, label }) {
               className={`gallery__thumb ${i === active ? 'is-active' : ''}`}
               onClick={() => setActive(i)}
             >
-              <CarVisual accent={v.accent} view={v.view} label={`${label} — ${v.label}`} />
+              <CarVisual accent={v.accent} view={v.view} src={v.src} label={`${label} — ${v.label}`} />
               <span className="gallery__thumb-label">{v.label}</span>
             </button>
           ))}
@@ -85,7 +85,7 @@ export default function PhotoGallery({ views, label }) {
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              <CarVisual accent={views[active].accent} view={views[active].view} label={label} />
+              <CarVisual accent={views[active].accent} view={views[active].view} src={views[active].src} label={label} />
               <p className="lightbox__caption">{views[active].label} · {label}</p>
             </motion.div>
             <button

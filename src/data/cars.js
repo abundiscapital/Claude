@@ -14,7 +14,40 @@ export const CATEGORIES = [
   { id: 'youngtimer', label: 'Youngtimers' },
 ]
 
+/* Helper : URL Unsplash (libre de droit) cadrée pour nos vignettes 16/10. */
+const u = (id) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1280&q=80`
+
 export const CARS = [
+  {
+    // Véhicule réel du loueur — photos personnelles (public/cars/rs3/).
+    id: 'rs3-berline-9k',
+    brand: 'Audi',
+    model: 'RS3 Berline',
+    year: 2025,
+    category: 'super',
+    city: 'Genève',
+    seats: 5,
+    power: 400,
+    gearbox: 'S tronic 7',
+    pricePerDay: 390,
+    deposit: 4000,
+    rating: 5.0,
+    reviews: 9,
+    accent: 'red',
+    tagline: 'Le cinq-cylindres qui n’a peur de personne.',
+    story:
+      "Mythic Black de la calandre au diffuseur, feux Matrix OLED signant la nuit d’un trait rouge. Sous le capot, le légendaire 2.5 TFSI cinq-cylindres — 400 chevaux et une sonorité que rien n’imite. À bord, baquets RS nid d’abeille surpiqués de rouge, Virtual Cockpit Plus et ambiance bleutée : une berline taillée pour ceux qui veulent tout, sans rien montrer.",
+    specs: { '0-100': '3.8 s', vmax: '290 km/h', poids: '1570 kg' },
+    options: ['Toit panoramique', 'Pack RS Design rouge', 'Échappement RS', 'Matrix LED OLED', 'Virtual Cockpit Plus', 'Sièges baquets RS', 'Caméra 360°', 'B&O Sound'],
+    instantBook: true,
+    owner: { name: '9K Luxury', verified: true, fleet: 7 },
+    images: [
+      { src: '/cars/rs3/front.jpeg', label: 'Avant' },
+      { src: '/cars/rs3/rear.jpeg', label: '3/4 arrière' },
+      { src: '/cars/rs3/cockpit.jpeg', label: 'Cockpit' },
+      { src: '/cars/rs3/seats.jpeg', label: 'Baquets RS' },
+    ],
+  },
   {
     id: 'sto-furia',
     brand: 'Lamborghini',
@@ -37,6 +70,11 @@ export const CARS = [
     options: ['Mode Pista', 'Échappement sport', 'Baquets carbone', 'Livraison voiturier'],
     instantBook: true,
     owner: { name: 'Maranello Prestige', verified: true, fleet: 12 },
+    images: [
+      { src: u('1544636331-e26879cd4d9b'), label: 'Profil' },
+      { src: u('1614162692292-7ac56d7f7f1e'), label: 'Avant' },
+      { src: u('1525609004556-c46c7d6cf023'), label: 'Arrière' },
+    ],
   },
   {
     id: 'chiron-noir',
@@ -60,6 +98,10 @@ export const CARS = [
     options: ['Conciergerie dédiée', 'Transport plateau fermé', 'Chauffeur sur demande'],
     instantBook: false,
     owner: { name: 'Riviera Collection', verified: true, fleet: 5 },
+    images: [
+      { src: u('1566024287286-457247b70310'), label: 'Profil' },
+      { src: u('1592198084033-aade902d1aae'), label: 'Avant' },
+    ],
   },
   {
     id: '296-rosso',
@@ -83,6 +125,11 @@ export const CARS = [
     options: ['Toit ouvrant', 'Pack carbone', 'Sièges chauffants', 'Apple CarPlay'],
     instantBook: true,
     owner: { name: 'Côte d’Azur Motors', verified: true, fleet: 18 },
+    images: [
+      { src: u('1583121274602-3e2820c69888'), label: 'Profil' },
+      { src: u('1592198084033-aade902d1aae'), label: 'Avant' },
+      { src: u('1605559424843-9e4c228bf1c2'), label: 'Détail' },
+    ],
   },
   {
     id: 'gt3-rs-blanc',
@@ -106,6 +153,11 @@ export const CARS = [
     options: ['Pack Weissach', 'Roll-bar', 'Télémétrie circuit', 'Casques fournis'],
     instantBook: true,
     owner: { name: 'Rhône Supercars', verified: true, fleet: 9 },
+    images: [
+      { src: u('1503376780353-7e6692767b70'), label: 'Profil' },
+      { src: u('1611821064430-0d40291d0f0b'), label: 'Avant' },
+      { src: u('1614200187524-dc4b892acf16'), label: 'Détail' },
+    ],
   },
   {
     id: 'urus-nuit',
@@ -129,6 +181,10 @@ export const CARS = [
     options: ['4 places confort', 'Attelage', 'Toit panoramique', 'B&O Sound'],
     instantBook: true,
     owner: { name: 'Léman Luxury Cars', verified: true, fleet: 22 },
+    images: [
+      { src: u('1606664515524-ed2f786a0bd6'), label: 'Profil' },
+      { src: u('1622200294772-e411a2e0bb85'), label: 'Avant' },
+    ],
   },
   {
     id: 'dbs-gt',
@@ -152,6 +208,10 @@ export const CARS = [
     options: ['Cuir bi-ton', 'Bang & Olufsen', 'Sellerie sur-mesure', 'Coffre 270 L'],
     instantBook: false,
     owner: { name: 'Aquitaine GT', verified: true, fleet: 6 },
+    images: [
+      { src: u('1618843479313-40f8afb4b4d8'), label: 'Profil' },
+      { src: u('1605559424843-9e4c228bf1c2'), label: 'Détail' },
+    ],
   },
   {
     id: 'f40-legende',
@@ -175,6 +235,10 @@ export const CARS = [
     options: ['Collector certifié', 'Transport fermé inclus', 'Accompagnement expert'],
     instantBook: false,
     owner: { name: 'Heritage Collection', verified: true, fleet: 3 },
+    images: [
+      { src: u('1611016186353-9af58c69a533'), label: 'Profil' },
+      { src: u('1600712242805-5f78671b24da'), label: 'Détail' },
+    ],
   },
   {
     id: 'revuelto-or',
@@ -198,6 +262,10 @@ export const CARS = [
     options: ['Mode Città silencieux', 'Carbone forgé', 'Caméra embarquée', 'Livraison France'],
     instantBook: true,
     owner: { name: 'Maranello Prestige', verified: true, fleet: 12 },
+    images: [
+      { src: u('1617814076367-b759c7d7e738'), label: 'Profil' },
+      { src: u('1621135802920-133df287f89c'), label: 'Avant' },
+    ],
   },
 ]
 
@@ -224,10 +292,24 @@ export const GALLERY_VIEWS = [
 ]
 
 export function getGallery(car) {
+  // Photos réelles disponibles → galerie photo. Sinon, vues synthétiques signature.
+  if (car.images?.length) {
+    return car.images.map((img, i) => ({
+      id: `${car.id}-${i}`,
+      label: img.label ?? `Vue ${i + 1}`,
+      src: img.src,
+      accent: i % 2 === 0 ? car.accent : car.accent === 'red' ? 'blue' : 'red',
+    }))
+  }
   return GALLERY_VIEWS.map((v, i) => ({
     ...v,
     accent: i % 2 === 0 ? car.accent : car.accent === 'red' ? 'blue' : 'red',
   }))
+}
+
+/* Image principale d'un véhicule (carte, miniatures). */
+export function getCover(car) {
+  return car.images?.[0]?.src ?? null
 }
 
 /* ---------- Disponibilités ----------

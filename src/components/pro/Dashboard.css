@@ -343,6 +343,65 @@
   flex: 0 0 auto;
 }
 
+/* ---------- DOSSIERS DE LOCATION ---------- */
+.dossiers {
+  display: grid;
+  gap: var(--sp-5);
+}
+.dossier {
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+}
+.dossier__head {
+  margin-bottom: var(--sp-4);
+}
+.dossier__car {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.dossier__docs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-3);
+}
+@media (min-width: 700px) {
+  .dossier__docs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.dossier__doc {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--asph-bg-elevated);
+  border: 1px solid var(--asph-border);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+.dossier__doc:hover {
+  border-color: var(--asph-red);
+  transform: translateY(-1px);
+}
+.dossier__doc svg {
+  color: var(--asph-trust);
+  flex: 0 0 auto;
+}
+.dossier__doc-title {
+  flex: 1 1 auto;
+  font-size: 0.95rem;
+}
+.dossier__doc-dl {
+  color: var(--asph-text-muted) !important;
+}
+
 /* ---------- PREMIUM ---------- */
 .premium {
   text-align: center;

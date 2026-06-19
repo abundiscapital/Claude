@@ -40,28 +40,51 @@ que `STRIPE_SECRET_KEY` / `KYC_API_KEY` sont fournis — sans changer le code.
 | Réservations | `/bookings/quote`, `/bookings`, `/bookings/:id/charge-extra`, `/close` | Devis, **gating KYC** (réservation refusée si non vérifié), acompte, refacturation, clôture. |
 | Paiements (Stripe Connect) | service `payments.js` | **Acompte** (capture), **caution** (pré-autorisation), **refacturation off-session**, **comptes connectés** & reversements loueur (commission déduite). |
 | Disponibilités | `/availability/:carId`, `/block` | Plages réservées + blocage de jours (garage/services). |
+| Documents | `/bookings/:id/documents`, `/bookings/documents/:docId/download` | **Génération PDF** par location : contrat, assurance, carte grise, conditions. |
 | Écosystème | `/ecosystem/partners`, `/apply` | Annuaire + candidature partenaire (création de compte connecté). |
 | Messages | `/messages/:threadId` | Fils client ↔ loueur. |
 
-> Les visuels véhicules restent des placeholders dégradés signature, à remplacer par la
-> photothèque pro. Le reste du parcours (vérification, paiements, disponibilités, écosystème,
-> messagerie) est désormais relié à une API réelle, prête à recevoir les clés des prestataires.
+**Persistance PostgreSQL** : avec `DATABASE_URL`, l'API écrit dans une vraie base
+(utilisateurs, sessions KYC, réservations, disponibilités, documents, messages — schéma dans
+`server/db/schema.sql`, appliqué au démarrage). **Sans** `DATABASE_URL`, repli automatique sur
+un store en mémoire pour la démo. Même philosophie mock-to-live que les paiements et le KYC.
+
+**Documents de location** : à chaque réservation confirmée, ASPHALT génère le dossier complet
+en PDF (contrat, attestation d'assurance, copie de carte grise, conditions générales). Le loueur
+les retrouve dans l'onglet **Documents** de son espace ; le locataire reçoit les liens de
+téléchargement à la validation de son dossier.
+
+> La flotte mêle désormais des **photos réelles** : l'**Audi RS3 Berline** du loueur (photos
+> personnelles dans `public/cars/rs3/`) et des visuels **libres de droit** (Unsplash) pour les
+> autres véhicules, avec repli automatique sur le placeholder signature si une image ne charge
+> pas — à remplacer librement par la photothèque pro.
 
 ## 🚀 Démarrer
 
 ```bash
 npm install
-cp .env.example .env   # optionnel : renseigner les clés pour le mode réel
+cp .env.example .env   # optionnel : clés (Stripe/KYC) + DATABASE_URL pour la persistance
 
 npm run dev            # front  → http://localhost:5173
-npm run server         # API    → http://localhost:4000  (mode mock par défaut)
+npm run server         # API    → http://localhost:4000  (mode mock + store mémoire par défaut)
 
 npm run build          # build de production dans dist/
 npm run preview        # prévisualiser le build
 ```
 
 Le front fonctionne **seul** (mode démo) ; lancez l'API en parallèle pour activer le
-parcours complet (KYC, devis, paiements, disponibilités, écosystème, messagerie).
+parcours complet (KYC, devis, paiements, disponibilités, **documents**, écosystème, messagerie).
+
+### Activer la persistance PostgreSQL
+
+```bash
+createdb asphalt
+export DATABASE_URL="postgresql://user:password@localhost:5432/asphalt"
+npm run server   # le schéma est appliqué automatiquement au démarrage
+```
+
+Au premier lancement, une location de démonstration (Audi RS3 Berline) est amorcée avec son
+dossier documentaire complet, visible immédiatement dans l'espace loueur › **Documents**.
 
 ## 🗂️ Structure
 
@@ -78,13 +101,19 @@ src/
 │   ├── ecosystem/          # Ecosystem + PartnerOnboarding
 │   ├── messages/           # Messagerie client ↔ loueur
 │   └── pro/                # Dashboard propriétaire
-├── data/                   # données de démo (cars, fleet, ecosystem, messages)
+├── data/                   # cars (+ Audi RS3 réelle), fleet, ecosystem, messages
 └── styles/                 # tokens.css (design system) + global.css
 
+public/
+└── cars/rs3/               # photos réelles de l'Audi RS3 Berline du loueur
+
 server/
-├── index.js                # app Express
-├── store.js                # store en mémoire (→ PostgreSQL en prod)
-├── services/               # kyc.js, payments.js (Stripe Connect)
+├── index.js                # app Express (+ migration & seed au démarrage)
+├── store.js                # couche persistance : PostgreSQL ↔ mémoire (auto)
+├── seed.js                 # location de démo + dossier documentaire
+├── db/                     # pool.js (connexion) + schema.sql
+├── storage/documents/      # PDF générés (contrats, assurances, cartes grises…)
+├── services/               # kyc.js, payments.js (Stripe Connect), documents.js (PDF)
 └── routes/                 # auth, bookings, availability, ecosystem, messages
 ```
 
@@ -155,13 +184,14 @@ Cette fondation est l'interface. Le produit complet s'appuiera sur :
 - [x] Annuaire de l'écosystème + onboarding partenaire
 - [x] API : auth/KYC, réservations (gating + acompte + caution + refacturation), disponibilités
 - [x] Couche Stripe Connect modélisée (comptes connectés, reversements), prête pour les vraies clés
+- [x] Persistance PostgreSQL (schéma, pool, migration & seed — repli mémoire en démo)
+- [x] Génération de documents PDF (contrat, assurance, carte grise, conditions) par location
+- [x] Photothèque : Audi RS3 réelle + visuels libres de droit (repli signature automatique)
 - [ ] Brancher le prestataire KYC réel (Stripe Identity / Onfido) — point d'extension `services/kyc.js`
-- [ ] Persistance PostgreSQL (remplacer le store en mémoire)
-- [ ] Photothèque véhicules (remplacer les placeholders dégradés)
-- [ ] Génération de documents (contrats, états des lieux, factures PDF)
+- [ ] Signature électronique des contrats + états des lieux photo (départ/retour)
 - [ ] Webhooks Stripe + notifications (email / SMS / push)
 - [ ] App mobile (React Native — la charte et les tokens sont déjà transposables)
 ```
 
-> Stack : React 19 · Vite · framer-motion · react-router-dom · lucide-react · Express · Stripe.
+> Stack : React 19 · Vite · framer-motion · react-router-dom · lucide-react · Express · PostgreSQL · pdfkit · Stripe.
 > Design system généré via la skill UI/UX Pro Max, adapté à la charte « quiet money » rouge & bleu.

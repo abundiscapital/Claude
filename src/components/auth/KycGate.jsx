@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
-  X, IdCard, Car, FileText, CreditCard, ShieldCheck, Check, Lock, ArrowRight,
+  X, IdCard, Car, FileText, CreditCard, ShieldCheck, Check, Lock, ArrowRight, Download,
 } from 'lucide-react'
 import { formatEUR } from '../../data/cars.js'
 import { api } from '../../api/client.js'
@@ -29,6 +29,7 @@ export default function KycGate({ car, total, range, onClose, onComplete }) {
   const [step, setStep] = useState(0)
   const [done, setDone] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [docs, setDocs] = useState([]) // documents de location renvoyés par l'API
   // Identifiants renvoyés par l'API (best-effort : l'UI fonctionne même hors-ligne).
   const ctx = useRef({ userId: null, sessionId: null })
   const isLast = step === STEPS.length - 1
@@ -56,7 +57,15 @@ export default function KycGate({ car, total, range, onClose, onComplete }) {
     if (isLast) {
       try {
         if (ctx.current.sessionId) await api.evaluateKyc(ctx.current.sessionId)
-      } catch { /* noop */ }
+        // Dossier vérifié → on crée la réservation et on récupère ses documents
+        // (contrat, assurance, carte grise, conditions), transmis au client.
+        if (ctx.current.userId && range?.start && range?.end) {
+          const { documents } = await api.book({
+            carId: car.id, userId: ctx.current.userId, start: range.start, end: range.end,
+          })
+          if (documents?.length) setDocs(documents)
+        }
+      } catch { /* API absente : on reste en mode démo */ }
       setDone(true)
     } else {
       setStep((s) => s + 1)
@@ -178,6 +187,25 @@ export default function KycGate({ car, total, range, onClose, onComplete }) {
               loueur. Acompte de {formatEUR(deposit)} pré-autorisé, débité à la confirmation.
               Vous êtes désormais un client vérifié ASPHALT.
             </p>
+
+            {docs.length > 0 && (
+              <div className="gate__docs">
+                <p className="gate__docs-title">
+                  <FileText size={15} aria-hidden="true" /> Vos documents de location
+                </p>
+                <ul className="gate__docs-list">
+                  {docs.map((d) => (
+                    <li key={d.id}>
+                      <a href={api.documentUrl(d.id)} target="_blank" rel="noreferrer">
+                        <span>{d.title}</span>
+                        <Download size={15} aria-hidden="true" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <button className="btn btn--primary btn--block" onClick={onComplete}>
               Terminé
             </button>

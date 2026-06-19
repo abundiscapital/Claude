@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Star, Gauge, Users, Zap, BadgeCheck } from 'lucide-react'
 import CarVisual from '../CarVisual.jsx'
-import { formatEUR } from '../../data/cars.js'
+import { formatEUR, getCover } from '../../data/cars.js'
 import './CarCard.css'
 
 export default function CarCard({ car, index = 0 }) {
@@ -16,7 +16,7 @@ export default function CarCard({ car, index = 0 }) {
     >
       <Link to={`/vehicule/${car.id}`} className="card__link">
         <div className="card__media">
-          <CarVisual accent={car.accent} label={`${car.brand} ${car.model}`} />
+          <CarVisual accent={car.accent} src={getCover(car)} label={`${car.brand} ${car.model}`} />
           {car.instantBook && (
             <span className="card__instant">
               <Zap size={12} aria-hidden="true" /> Réservation immédiate

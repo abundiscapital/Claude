@@ -1,7 +1,8 @@
 /*
   API ASPHALT — Express.
-  Mock-capable : tourne sans aucune clé. Renseignez STRIPE_SECRET_KEY et/ou
-  KYC_API_KEY (voir .env.example) pour passer en mode réel sans changer de code.
+  Mock-capable : tourne sans aucune clé. Renseignez DATABASE_URL (persistance
+  PostgreSQL), STRIPE_SECRET_KEY et/ou KYC_API_KEY (voir .env.example) pour
+  passer en mode réel sans changer de code.
 */
 import 'dotenv/config'
 import express from 'express'
@@ -14,13 +15,20 @@ import ecosystemRoutes from './routes/ecosystem.js'
 import messageRoutes from './routes/messages.js'
 import { paymentsMode } from './services/payments.js'
 import { kycMode } from './services/kyc.js'
+import { dbMode, migrate } from './db/pool.js'
+import { store } from './store.js'
+import { seedDemo } from './seed.js'
 
 const app = express()
 app.use(cors())
 app.use(express.json())
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'asphalt-api', modes: { payments: paymentsMode, kyc: kycMode } })
+  res.json({
+    status: 'ok',
+    service: 'asphalt-api',
+    modes: { db: dbMode, payments: paymentsMode, kyc: kycMode },
+  })
 })
 
 app.use('/api/auth', authRoutes)
@@ -32,9 +40,20 @@ app.use('/api/messages', messageRoutes)
 app.use((req, res) => res.status(404).json({ error: 'route inconnue' }))
 
 const PORT = process.env.PORT ?? 4000
-app.listen(PORT, () => {
-  console.log(`ASPHALT API → http://localhost:${PORT}`)
-  console.log(`  paiements: ${paymentsMode} · kyc: ${kycMode}`)
+
+async function start() {
+  await migrate()        // applique le schéma si DATABASE_URL est présente
+  await store.init?.()
+  await seedDemo().catch((e) => console.error('seed:', e.message))
+  app.listen(PORT, () => {
+    console.log(`ASPHALT API → http://localhost:${PORT}`)
+    console.log(`  base: ${dbMode} · paiements: ${paymentsMode} · kyc: ${kycMode}`)
+  })
+}
+
+start().catch((e) => {
+  console.error('Démarrage API échoué:', e)
+  process.exit(1)
 })
 
 export default app

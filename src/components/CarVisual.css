@@ -31,6 +31,19 @@
   transition: transform var(--dur-slow) var(--ease-out);
 }
 
+/* ---------- Photo réelle ---------- */
+.carvisual__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.carvisual--photo {
+  background: #0a0a0e;
+}
+
 .carvisual__reflection {
   position: absolute;
   bottom: 0;

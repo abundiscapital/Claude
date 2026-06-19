@@ -34,6 +34,11 @@ export const api = {
   chargeExtra: (bookingId, amountEur, reason) =>
     req(`/bookings/${bookingId}/charge-extra`, { method: 'POST', body: { amountEur, reason } }),
 
+  // documents de location (contrat, assurance, carte grise, conditions)
+  bookings: () => req('/bookings'),
+  documents: (bookingId) => req(`/bookings/${bookingId}/documents`),
+  documentUrl: (docId) => `${BASE}/bookings/documents/${docId}/download`,
+
   // availability
   availability: (carId) => req(`/availability/${carId}`),
   blockDay: (carId, day, blocked) =>

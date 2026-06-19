@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   LayoutGrid, CarFront, CalendarClock, Wallet, FileText, MapPin, Crown,
   ArrowUpRight, PlaneTakeoff, PlaneLanding, Wrench, TrendingUp, Plus, Download,
+  FileSignature, ShieldCheck, ScrollText, BookOpen,
 } from 'lucide-react'
 import { KPIS, FLEET, PLANNING, PAYMENTS, STATUS_LABEL } from '../../data/fleet.js'
 import { formatEUR, getBookedRanges } from '../../data/cars.js'
+import { api } from '../../api/client.js'
 import AvailabilityCalendar from '../AvailabilityCalendar.jsx'
 import './Dashboard.css'
 
@@ -247,22 +249,115 @@ function Payments() {
   )
 }
 
+const DOC_ICON = {
+  contract: FileSignature,
+  insurance: ShieldCheck,
+  registration: ScrollText,
+  terms: BookOpen,
+}
+const fmtDay = (d) =>
+  d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+
 function Documents() {
-  const docs = [
-    'Contrats de location signés', 'Cartes grises & assurances', 'États des lieux (départ/retour)',
-    'Factures émises', 'Justificatifs de frais refacturés',
-  ]
+  const [bookings, setBookings] = useState(null) // null = chargement, [] = vide/hors-ligne
+  const [docsByBooking, setDocsByBooking] = useState({})
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const { bookings: list } = await api.bookings()
+        if (!alive) return
+        setBookings(list)
+        const entries = await Promise.all(
+          list.map(async (b) => {
+            try {
+              const { documents } = await api.documents(b.id)
+              return [b.id, documents]
+            } catch {
+              return [b.id, []]
+            }
+          }),
+        )
+        if (alive) setDocsByBooking(Object.fromEntries(entries))
+      } catch {
+        if (alive) setBookings([]) // API absente → mode démo
+      }
+    })()
+    return () => { alive = false }
+  }, [])
+
   return (
     <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <PanelHead title="Documentation" subtitle="Centralisée, horodatée et exportable." />
-      <div className="docgrid">
-        {docs.map((d) => (
-          <div className="doccard" key={d}>
-            <FileText size={20} aria-hidden="true" />
-            <span>{d}</span>
+      <PanelHead
+        title="Documentation"
+        subtitle="Le dossier complet de chaque location : contrat, assurance, carte grise et conditions — généré automatiquement, transmis au locataire."
+      />
+
+      {bookings === null && <p className="text-muted">Chargement des dossiers…</p>}
+
+      {bookings && bookings.length > 0 && (
+        <div className="dossiers">
+          {bookings.map((b) => {
+            const docs = docsByBooking[b.id] ?? []
+            return (
+              <article className="dossier" key={b.id}>
+                <header className="dossier__head">
+                  <div>
+                    <p className="dossier__car">
+                      {b.car ? `${b.car.brand} ${b.car.model}` : b.carId}
+                      <span className={`status status--${b.status}`}>{STATUS_LABEL[b.status] ?? b.status}</span>
+                    </p>
+                    <p className="text-muted">
+                      {b.renterName ?? 'Locataire'} · du {fmtDay(b.start)} au {fmtDay(b.end)} · réf. {b.id.toUpperCase()}
+                    </p>
+                  </div>
+                </header>
+                <div className="dossier__docs">
+                  {docs.map((d) => {
+                    const Icon = DOC_ICON[d.kind] ?? FileText
+                    return (
+                      <a
+                        key={d.id}
+                        className="dossier__doc"
+                        href={api.documentUrl(d.id)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Icon size={18} aria-hidden="true" />
+                        <span className="dossier__doc-title">{d.title}</span>
+                        <Download size={15} className="dossier__doc-dl" aria-hidden="true" />
+                      </a>
+                    )
+                  })}
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      )}
+
+      {bookings && bookings.length === 0 && (
+        <>
+          <p className="text-muted dash__hint">
+            Lancez l’API (<code>npm run server</code>) pour générer et télécharger les vrais
+            documents. Types produits pour chaque location :
+          </p>
+          <div className="docgrid">
+            {[
+              ['Contrat de location', FileSignature],
+              ['Attestation d’assurance', ShieldCheck],
+              ['Carte grise (copie)', ScrollText],
+              ['Conditions générales', BookOpen],
+            ].map(([d, Icon]) => (
+              <div className="doccard" key={d}>
+                <Icon size={20} aria-hidden="true" />
+                <span>{d}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </motion.section>
   )
 }
