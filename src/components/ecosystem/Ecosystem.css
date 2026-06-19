@@ -1,0 +1,109 @@
+.eco__hero {
+  padding-block: var(--sp-10) var(--sp-6);
+  border-bottom: 1px solid var(--asph-border);
+  background:
+    radial-gradient(70% 60% at 15% 0%, rgba(14, 36, 82, 0.4), transparent 60%),
+    radial-gradient(50% 50% at 90% 10%, rgba(124, 15, 29, 0.2), transparent 65%);
+}
+.eco__title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  margin-block: var(--sp-4) var(--sp-4);
+  max-width: 18ch;
+}
+.eco__lead {
+  font-size: var(--fs-18);
+  max-width: 64ch;
+  margin-bottom: var(--sp-6);
+}
+
+.eco__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--sp-5);
+  margin-top: var(--sp-6);
+}
+@media (min-width: 640px) {
+  .eco__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1000px) {
+  .eco__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.partner {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-5);
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+.partner:hover {
+  border-color: var(--asph-border-strong);
+  transform: translateY(-3px);
+}
+.partner__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+.partner__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--asph-surface-2);
+  border: 1px solid var(--asph-border);
+  color: var(--asph-trust);
+}
+.partner__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-14);
+}
+.partner__rating svg {
+  color: var(--asph-warning);
+  fill: var(--asph-warning);
+}
+.partner__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-18);
+}
+.partner__verified {
+  color: var(--asph-trust);
+}
+.partner__city {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-14);
+  margin-top: 4px;
+}
+.partner__blurb {
+  margin-top: var(--sp-3);
+  font-size: var(--fs-14);
+  flex: 1;
+}
+.partner__services {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: 0;
+  margin-top: var(--sp-4);
+}
+.partner__jobs {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--asph-border);
+  font-size: var(--fs-12);
+}

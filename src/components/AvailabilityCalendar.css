@@ -1,0 +1,138 @@
+.cal {
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border);
+  border-radius: var(--radius-md);
+  padding: var(--sp-4);
+}
+.cal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-4);
+}
+.cal__month {
+  font-family: var(--asph-font-display);
+  font-size: var(--fs-18);
+  font-weight: 600;
+}
+.cal__nav {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  background: var(--asph-surface-2);
+  border: 1px solid var(--asph-border);
+  color: var(--asph-text);
+  transition: background var(--dur) var(--ease-out);
+}
+.cal__nav:hover:not(:disabled) {
+  background: var(--asph-surface-hover);
+}
+.cal__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.cal__grid--head {
+  margin-bottom: 6px;
+}
+.cal__dow {
+  text-align: center;
+  font-size: var(--fs-12);
+  color: var(--asph-text-faint);
+  padding: 4px 0;
+}
+
+.cal__day {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--asph-surface-2);
+  color: var(--asph-text);
+  font-size: var(--fs-14);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.cal__day:hover:not(:disabled) {
+  border-color: var(--asph-border-strong);
+}
+.cal__day--empty {
+  background: none;
+  border: none;
+}
+.cal__day.is-past {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.cal__day.is-unavail {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--asph-surface),
+    var(--asph-surface) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  color: var(--asph-text-faint);
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.cal__day.is-inrange {
+  background: rgba(47, 107, 255, 0.18);
+  color: var(--asph-text);
+}
+.cal__day.is-edge {
+  background: var(--asph-trust);
+  color: #fff;
+  border-color: var(--asph-trust);
+  font-weight: 600;
+}
+.cal__day.is-blocked {
+  background: rgba(216, 162, 58, 0.18);
+  border-color: rgba(216, 162, 58, 0.4);
+  color: var(--asph-warning);
+}
+
+.cal__legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--asph-border);
+  font-size: var(--fs-12);
+  color: var(--asph-text-muted);
+}
+.cal__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.dot--free {
+  background: var(--asph-surface-2);
+  border: 1px solid var(--asph-border-strong);
+}
+.dot--unavail {
+  background: repeating-linear-gradient(45deg, var(--asph-surface), var(--asph-surface) 2px, var(--asph-text-faint) 2px, var(--asph-text-faint) 4px);
+}
+.dot--sel {
+  background: var(--asph-trust);
+}
+.dot--blocked {
+  background: var(--asph-warning);
+}
