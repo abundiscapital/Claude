@@ -23,36 +23,69 @@ accents **rouge sport / bleu nuit**, typographie luxe (Bodoni Moda + Jost).
 | **Intro signature** | `SplashIntro` | Supercar surgissant du noir, phares allumés, faisceau de lumière projeté — l'identité de marque dès l'ouverture. |
 | **Découverte client** | `Home` | Hero de recherche (où / quand) façon Airbnb, filtres par catégorie, flotte storytellée. |
 | **Résultats** | `SearchResults` | Filtrage par ville + catégorie via l'URL (deep-linkable). |
-| **Fiche véhicule** | `CarDetail` | Histoire, performances, options & conditions, panneau de réservation avec acompte/caution. |
-| **Authentification KYC** | `KycGate` | Déclenchée **uniquement après** que le client a trouvé son véhicule : compte → identité → permis → domicile → carte & solvabilité → acompte. |
-| **Espace pro** | `Dashboard` | Flotte, planning (départs/retours/immobilisations), paiements & facturation, documents, **tracking Premium**. |
+| **Fiche véhicule** | `CarDetail` | Galerie immersive multi-angles + lightbox, histoire, performances, options, **calendrier de disponibilités interactif**, réservation avec acompte/caution. |
+| **Authentification KYC** | `KycGate` | Déclenchée **uniquement après** que le client a trouvé son véhicule : compte → identité → permis → domicile → carte & solvabilité → acompte. Relie l'API en best-effort. |
+| **Écosystème** | `Ecosystem` | Annuaire des partenaires (garages, carrosserie, detailing, assurances, concessionnaires) + **onboarding partenaire** en 4 étapes. |
+| **Messagerie** | `Messages` | Fil de discussion client ↔ loueur, liste de conversations, composeur. |
+| **Espace pro** | `Dashboard` | Flotte, planning + **calendrier de gestion des indisponibilités**, paiements & facturation, documents, **tracking Premium**. |
 
-> Les visuels véhicules sont des placeholders dégradés signature, à remplacer par la
-> photothèque pro. Les vérifications KYC et les paiements sont modélisés côté front et
-> destinés à être branchés sur les API décrites plus bas.
+### Backend — API ASPHALT (`server/`)
+
+API **Express** mock-capable : elle tourne **sans aucune clé**, et passe en mode réel dès
+que `STRIPE_SECRET_KEY` / `KYC_API_KEY` sont fournis — sans changer le code.
+
+| Domaine | Endpoints | Ce qui est modélisé |
+|---|---|---|
+| Auth & KYC | `/auth/register`, `/auth/kyc/*` | Session de vérification, dépôt des 4 documents, évaluation, statut réutilisable. |
+| Réservations | `/bookings/quote`, `/bookings`, `/bookings/:id/charge-extra`, `/close` | Devis, **gating KYC** (réservation refusée si non vérifié), acompte, refacturation, clôture. |
+| Paiements (Stripe Connect) | service `payments.js` | **Acompte** (capture), **caution** (pré-autorisation), **refacturation off-session**, **comptes connectés** & reversements loueur (commission déduite). |
+| Disponibilités | `/availability/:carId`, `/block` | Plages réservées + blocage de jours (garage/services). |
+| Écosystème | `/ecosystem/partners`, `/apply` | Annuaire + candidature partenaire (création de compte connecté). |
+| Messages | `/messages/:threadId` | Fils client ↔ loueur. |
+
+> Les visuels véhicules restent des placeholders dégradés signature, à remplacer par la
+> photothèque pro. Le reste du parcours (vérification, paiements, disponibilités, écosystème,
+> messagerie) est désormais relié à une API réelle, prête à recevoir les clés des prestataires.
 
 ## 🚀 Démarrer
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # build de production dans dist/
-npm run preview  # prévisualiser le build
+cp .env.example .env   # optionnel : renseigner les clés pour le mode réel
+
+npm run dev            # front  → http://localhost:5173
+npm run server         # API    → http://localhost:4000  (mode mock par défaut)
+
+npm run build          # build de production dans dist/
+npm run preview        # prévisualiser le build
 ```
+
+Le front fonctionne **seul** (mode démo) ; lancez l'API en parallèle pour activer le
+parcours complet (KYC, devis, paiements, disponibilités, écosystème, messagerie).
 
 ## 🗂️ Structure
 
 ```
 src/
+├── api/                    # client API (fetch + dégradation gracieuse)
 ├── components/
 │   ├── SplashIntro.*        # intro signature
+│   ├── AvailabilityCalendar # calendrier partagé (client + pro)
 │   ├── Navbar / Footer
 │   ├── CarVisual / CarSilhouette
-│   ├── client/             # Home, SearchResults, CarCard, CarDetail
+│   ├── client/             # Home, SearchResults, CarCard, CarDetail, PhotoGallery
 │   ├── auth/               # KycGate (vérification), Connexion
+│   ├── ecosystem/          # Ecosystem + PartnerOnboarding
+│   ├── messages/           # Messagerie client ↔ loueur
 │   └── pro/                # Dashboard propriétaire
-├── data/                   # flotte & données de démo (cars.js, fleet.js)
+├── data/                   # données de démo (cars, fleet, ecosystem, messages)
 └── styles/                 # tokens.css (design system) + global.css
+
+server/
+├── index.js                # app Express
+├── store.js                # store en mémoire (→ PostgreSQL en prod)
+├── services/               # kyc.js, payments.js (Stripe Connect)
+└── routes/                 # auth, bookings, availability, ecosystem, messages
 ```
 
 Le **design system** vit dans `src/styles/tokens.css` : toutes les couleurs, espacements,
@@ -116,14 +149,19 @@ Cette fondation est l'interface. Le produit complet s'appuiera sur :
 
 ## 🛣️ Prochaines étapes
 
-- [ ] Brancher l'authentification réelle + KYC sur un prestataire
-- [ ] Intégrer le PSP (acomptes, cautions, refacturation)
-- [ ] Photothèque véhicules + galerie immersive sur la fiche
-- [ ] Calendrier de disponibilités interactif (côté client et pro)
-- [ ] Messagerie client ↔ loueur
-- [ ] Onboarding pro + annuaire de l'écosystème (garages, assurances…)
+- [x] Galerie immersive multi-angles + lightbox sur la fiche
+- [x] Calendrier de disponibilités interactif (client + pro)
+- [x] Messagerie client ↔ loueur
+- [x] Annuaire de l'écosystème + onboarding partenaire
+- [x] API : auth/KYC, réservations (gating + acompte + caution + refacturation), disponibilités
+- [x] Couche Stripe Connect modélisée (comptes connectés, reversements), prête pour les vraies clés
+- [ ] Brancher le prestataire KYC réel (Stripe Identity / Onfido) — point d'extension `services/kyc.js`
+- [ ] Persistance PostgreSQL (remplacer le store en mémoire)
+- [ ] Photothèque véhicules (remplacer les placeholders dégradés)
+- [ ] Génération de documents (contrats, états des lieux, factures PDF)
+- [ ] Webhooks Stripe + notifications (email / SMS / push)
 - [ ] App mobile (React Native — la charte et les tokens sont déjà transposables)
 ```
 
-> Stack : React 19 · Vite · framer-motion · react-router-dom · lucide-react.
+> Stack : React 19 · Vite · framer-motion · react-router-dom · lucide-react · Express · Stripe.
 > Design system généré via la skill UI/UX Pro Max, adapté à la charte « quiet money » rouge & bleu.

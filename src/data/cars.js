@@ -211,3 +211,56 @@ export const formatEUR = (n) =>
     currency: 'EUR',
     maximumFractionDigits: 0,
   }).format(n)
+
+/* ---------- Galerie ----------
+   En attendant la photothèque pro, chaque véhicule expose plusieurs « vues »
+   rendues par CarVisual (cadrage/halo différents). Le 1er accent suit la marque,
+   les suivants alternent pour créer du contraste visuel dans le carrousel. */
+export const GALLERY_VIEWS = [
+  { id: 'profil', label: 'Profil', view: 'profile' },
+  { id: 'avant', label: 'Avant', view: 'front' },
+  { id: 'arriere', label: '3/4 arrière', view: 'rear' },
+  { id: 'detail', label: 'Détail', view: 'detail' },
+]
+
+export function getGallery(car) {
+  return GALLERY_VIEWS.map((v, i) => ({
+    ...v,
+    accent: i % 2 === 0 ? car.accent : car.accent === 'red' ? 'blue' : 'red',
+  }))
+}
+
+/* ---------- Disponibilités ----------
+   Plages réservées déterministes (démo) dérivées de l'id, à partir d'aujourd'hui.
+   Remplacé par l'API /availability côté production. */
+function hashStr(s) {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0
+  return h
+}
+
+const DAY = 86400000
+
+export function getBookedRanges(carId, from = new Date()) {
+  const h = hashStr(carId)
+  const base = new Date(from)
+  base.setHours(0, 0, 0, 0)
+  const ranges = []
+  // deux à trois plages réparties sur ~8 semaines
+  const seeds = [
+    { offset: 3 + (h % 5), len: 2 + (h % 3) },
+    { offset: 16 + (h % 7), len: 3 + ((h >> 3) % 4) },
+    { offset: 34 + (h % 9), len: 2 + ((h >> 5) % 3) },
+  ]
+  for (const s of seeds) {
+    const start = new Date(base.getTime() + s.offset * DAY)
+    const end = new Date(start.getTime() + s.len * DAY)
+    ranges.push({ from: start, to: end })
+  }
+  return ranges
+}
+
+export function isDayBooked(date, ranges) {
+  const t = new Date(date).setHours(0, 0, 0, 0)
+  return ranges.some((r) => t >= new Date(r.from).setHours(0, 0, 0, 0) && t <= new Date(r.to).setHours(0, 0, 0, 0))
+}

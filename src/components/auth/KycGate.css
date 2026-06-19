@@ -55,6 +55,21 @@
   font-size: var(--fs-24);
   margin-block: var(--sp-2) var(--sp-3);
 }
+.gate__dates {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: rgba(47, 107, 255, 0.12);
+  border: 1px solid rgba(47, 107, 255, 0.3);
+  color: var(--asph-text);
+  font-size: var(--fs-14);
+}
+.gate__dates svg {
+  color: var(--asph-trust);
+}
 
 .gate__steps {
   list-style: none;

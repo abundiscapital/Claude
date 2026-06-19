@@ -142,6 +142,40 @@
 .dash__hint {
   margin-bottom: var(--sp-5);
 }
+.dash__cols--planning {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 920px) {
+  .dash__cols--planning {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+.planning__calhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-2);
+  flex-wrap: wrap;
+}
+.planning__select {
+  background: var(--asph-surface-2);
+  color: var(--asph-text);
+  border: 1px solid var(--asph-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color-scheme: dark;
+  font-size: var(--fs-14);
+}
+.planning__hint {
+  font-size: var(--fs-14);
+  margin-bottom: var(--sp-4);
+}
+.planning__count {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-12);
+}
 
 /* ---------- TIMELINE ---------- */
 .timeline {

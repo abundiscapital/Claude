@@ -45,11 +45,21 @@
   fill: var(--asph-warning);
 }
 
-.detail__hero {
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--asph-border);
+.detail__gallery {
   margin-bottom: var(--sp-6);
+}
+.detail__h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.detail__h2 svg {
+  color: var(--asph-trust);
+}
+.detail__cal-hint {
+  margin-top: calc(var(--sp-4) * -1 + 4px);
+  margin-bottom: var(--sp-4);
+  font-size: var(--fs-14);
 }
 
 .detail__layout {
@@ -141,10 +151,18 @@
   display: flex;
   align-items: center;
   gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.detail__owner-info {
+  flex: 1;
+  min-width: 180px;
 }
 .detail__owner-name {
   font-size: var(--fs-18);
   font-weight: 600;
+}
+.detail__contact {
+  min-height: 42px;
 }
 
 /* ---------- BOOKING ---------- */
@@ -160,21 +178,33 @@
 .booking__price strong {
   font-size: var(--fs-32);
 }
-.booking__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.booking__dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
   margin-top: var(--sp-5);
-  padding-bottom: var(--sp-4);
-  border-bottom: 1px solid var(--asph-border);
 }
-.booking__row select {
-  background: var(--asph-surface-2);
-  color: var(--asph-text);
+.booking__date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
   border: 1px solid var(--asph-border-strong);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  color-scheme: dark;
+  border-radius: var(--radius-md);
+  background: var(--asph-surface-2);
+}
+.booking__date span {
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.booking__date.is-set {
+  border-color: var(--asph-trust);
+}
+.booking__pick {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-14);
+  text-align: center;
 }
 .booking__lines {
   margin: var(--sp-4) 0;

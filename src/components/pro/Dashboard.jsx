@@ -5,7 +5,8 @@ import {
   ArrowUpRight, PlaneTakeoff, PlaneLanding, Wrench, TrendingUp, Plus, Download,
 } from 'lucide-react'
 import { KPIS, FLEET, PLANNING, PAYMENTS, STATUS_LABEL } from '../../data/fleet.js'
-import { formatEUR } from '../../data/cars.js'
+import { formatEUR, getBookedRanges } from '../../data/cars.js'
+import AvailabilityCalendar from '../AvailabilityCalendar.jsx'
 import './Dashboard.css'
 
 const TABS = [
@@ -133,15 +134,57 @@ function Fleet() {
 }
 
 function Planning() {
+  const [vehicle, setVehicle] = useState(FLEET[0].id)
+  const [blocked, setBlocked] = useState(new Set())
+  const booked = getBookedRanges(vehicle)
+
+  const toggle = (isoDay) =>
+    setBlocked((prev) => {
+      const nextSet = new Set(prev)
+      if (nextSet.has(isoDay)) nextSet.delete(isoDay)
+      else nextSet.add(isoDay)
+      return nextSet
+    })
+
   return (
     <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <PanelHead
-        title="Planning"
+        title="Planning & disponibilités"
         subtitle="Départs, retours et immobilisations (garage, vidanges, services)."
-        action={<button className="btn btn--ghost"><Wrench size={16} aria-hidden="true" /> Bloquer un créneau</button>}
       />
-      <div className="panel">
-        <PlanningList items={PLANNING} />
+      <div className="dash__cols dash__cols--planning">
+        <div className="panel">
+          <h2 className="panel__title">Mouvements à venir</h2>
+          <PlanningList items={PLANNING} />
+        </div>
+        <div className="panel">
+          <div className="planning__calhead">
+            <h2 className="panel__title">Gérer les indisponibilités</h2>
+            <select
+              className="planning__select"
+              value={vehicle}
+              onChange={(e) => { setVehicle(e.target.value); setBlocked(new Set()) }}
+              aria-label="Choisir un véhicule"
+            >
+              {FLEET.map((v) => (
+                <option key={v.id} value={v.id}>{v.name}</option>
+              ))}
+            </select>
+          </div>
+          <p className="text-muted planning__hint">
+            Cliquez un jour libre pour le bloquer (garage, entretien, usage perso).
+          </p>
+          <AvailabilityCalendar
+            mode="manage"
+            booked={booked}
+            blocked={blocked}
+            onToggleBlock={toggle}
+          />
+          <p className="planning__count text-muted">
+            {blocked.size} jour{blocked.size > 1 ? 's' : ''} bloqué{blocked.size > 1 ? 's' : ''} ·
+            sauvegardé automatiquement
+          </p>
+        </div>
       </div>
     </motion.section>
   )

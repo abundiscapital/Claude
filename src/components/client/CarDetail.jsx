@@ -1,20 +1,29 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Star, Gauge, Users, Timer, Wind, Weight, BadgeCheck, Check, ShieldCheck,
+  CalendarRange, MessageCircle,
 } from 'lucide-react'
-import { getCar, formatEUR } from '../../data/cars.js'
-import CarVisual from '../CarVisual.jsx'
+import { getCar, getGallery, getBookedRanges, formatEUR } from '../../data/cars.js'
+import PhotoGallery from './PhotoGallery.jsx'
+import AvailabilityCalendar from '../AvailabilityCalendar.jsx'
 import KycGate from '../auth/KycGate.jsx'
 import './CarDetail.css'
+
+const DAY = 86400000
+const fmtDate = (d) =>
+  new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 
 export default function CarDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const car = getCar(id)
-  const [days, setDays] = useState(2)
+  const [range, setRange] = useState({ start: null, end: null })
   const [gateOpen, setGateOpen] = useState(false)
+
+  const gallery = useMemo(() => (car ? getGallery(car) : []), [car])
+  const booked = useMemo(() => (car ? getBookedRanges(car.id) : []), [car])
 
   if (!car) {
     return (
@@ -25,9 +34,14 @@ export default function CarDetail() {
     )
   }
 
+  const days =
+    range.start && range.end
+      ? Math.max(1, Math.round((new Date(range.end) - new Date(range.start)) / DAY))
+      : 0
   const subtotal = car.pricePerDay * days
   const serviceFee = Math.round(subtotal * 0.1)
   const total = subtotal + serviceFee
+  const ready = days > 0
 
   return (
     <div className="detail">
@@ -49,12 +63,12 @@ export default function CarDetail() {
         </header>
 
         <motion.div
-          className="detail__hero"
+          className="detail__gallery"
           initial={{ opacity: 0, scale: 0.99 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <CarVisual accent={car.accent} label={`${car.brand} ${car.model}`} eager />
+          <PhotoGallery views={gallery} label={`${car.brand} ${car.model}`} />
         </motion.div>
 
         <div className="detail__layout">
@@ -85,14 +99,32 @@ export default function CarDetail() {
               </ul>
             </section>
 
+            <section className="detail__block">
+              <h2 className="detail__h2">
+                <CalendarRange size={20} aria-hidden="true" /> Disponibilités
+              </h2>
+              <p className="text-muted detail__cal-hint">
+                Sélectionnez vos dates. Les jours barrés sont déjà réservés.
+              </p>
+              <AvailabilityCalendar
+                mode="select"
+                booked={booked}
+                range={range}
+                onRangeChange={setRange}
+              />
+            </section>
+
             <section className="detail__block detail__owner">
               {car.owner.verified && <BadgeCheck size={22} className="card__verified" aria-hidden="true" />}
-              <div>
+              <div className="detail__owner-info">
                 <p className="detail__owner-name">{car.owner.name}</p>
                 <p className="text-muted">
                   Loueur vérifié · {car.owner.fleet} véhicules sur ASPHALT
                 </p>
               </div>
+              <Link to="/messages" className="btn btn--ghost detail__contact">
+                <MessageCircle size={16} aria-hidden="true" /> Contacter
+              </Link>
             </section>
           </div>
 
@@ -103,36 +135,48 @@ export default function CarDetail() {
               <span className="text-muted"> / jour</span>
             </div>
 
-            <label className="booking__row">
-              <span>Durée</span>
-              <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
-                {[1, 2, 3, 4, 5, 7, 10, 14].map((d) => (
-                  <option key={d} value={d}>{d} jour{d > 1 ? 's' : ''}</option>
-                ))}
-              </select>
-            </label>
+            <div className="booking__dates">
+              <div className={`booking__date ${range.start ? 'is-set' : ''}`}>
+                <span className="text-muted">Début</span>
+                <strong>{range.start ? fmtDate(range.start) : '—'}</strong>
+              </div>
+              <div className={`booking__date ${range.end ? 'is-set' : ''}`}>
+                <span className="text-muted">Fin</span>
+                <strong>{range.end ? fmtDate(range.end) : '—'}</strong>
+              </div>
+            </div>
 
-            <dl className="booking__lines">
-              <div>
-                <dt className="text-muted">{formatEUR(car.pricePerDay)} × {days} j</dt>
-                <dd className="tabular">{formatEUR(subtotal)}</dd>
-              </div>
-              <div>
-                <dt className="text-muted">Frais de service</dt>
-                <dd className="tabular">{formatEUR(serviceFee)}</dd>
-              </div>
-              <div className="booking__total">
-                <dt>Total</dt>
-                <dd className="tabular">{formatEUR(total)}</dd>
-              </div>
-            </dl>
+            {ready ? (
+              <dl className="booking__lines">
+                <div>
+                  <dt className="text-muted">{formatEUR(car.pricePerDay)} × {days} j</dt>
+                  <dd className="tabular">{formatEUR(subtotal)}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Frais de service</dt>
+                  <dd className="tabular">{formatEUR(serviceFee)}</dd>
+                </div>
+                <div className="booking__total">
+                  <dt>Total</dt>
+                  <dd className="tabular">{formatEUR(total)}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="booking__pick text-muted">
+                Choisissez vos dates dans le calendrier pour voir le tarif.
+              </p>
+            )}
 
             <p className="booking__deposit text-muted">
               <ShieldCheck size={14} aria-hidden="true" /> Caution {formatEUR(car.deposit)} ·
               acompte de 30 % pour bloquer la réservation
             </p>
 
-            <button className="btn btn--primary btn--block" onClick={() => setGateOpen(true)}>
+            <button
+              className="btn btn--primary btn--block"
+              onClick={() => setGateOpen(true)}
+              disabled={!ready}
+            >
               {car.instantBook ? 'Réserver en un clic' : 'Demander à réserver'}
             </button>
             <p className="booking__note text-muted">
@@ -147,6 +191,7 @@ export default function CarDetail() {
           <KycGate
             car={car}
             total={total}
+            range={range}
             onClose={() => setGateOpen(false)}
             onComplete={() => {
               setGateOpen(false)

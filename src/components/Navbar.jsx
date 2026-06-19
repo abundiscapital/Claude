@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Zap, LayoutDashboard, Search } from 'lucide-react'
+import { Zap, LayoutDashboard, Search, Network, MessageCircle } from 'lucide-react'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -20,6 +20,18 @@ export default function Navbar() {
             className={`nav__link ${!onPro ? 'is-active' : ''}`}
           >
             <Search size={16} aria-hidden="true" /> Explorer
+          </Link>
+          <Link
+            to="/ecosysteme"
+            className={`nav__link ${pathname.startsWith('/ecosysteme') ? 'is-active' : ''}`}
+          >
+            <Network size={16} aria-hidden="true" /> Écosystème
+          </Link>
+          <Link
+            to="/messages"
+            className={`nav__link ${pathname.startsWith('/messages') ? 'is-active' : ''}`}
+          >
+            <MessageCircle size={16} aria-hidden="true" /> Messages
           </Link>
           <Link
             to="/pro"

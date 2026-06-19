@@ -9,6 +9,8 @@ import SearchResults from './components/client/SearchResults.jsx'
 import CarDetail from './components/client/CarDetail.jsx'
 import Dashboard from './components/pro/Dashboard.jsx'
 import Connexion from './components/auth/Connexion.jsx'
+import Ecosystem from './components/ecosystem/Ecosystem.jsx'
+import Messages from './components/messages/Messages.jsx'
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(
@@ -34,6 +36,8 @@ export default function App() {
             <Route path="/recherche" element={<SearchResults />} />
             <Route path="/vehicule/:id" element={<CarDetail />} />
             <Route path="/pro" element={<Dashboard />} />
+            <Route path="/ecosysteme" element={<Ecosystem />} />
+            <Route path="/messages" element={<Messages />} />
             <Route path="/connexion" element={<Connexion />} />
           </Routes>
           <Footer />

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   X, IdCard, Car, FileText, CreditCard, ShieldCheck, Check, Lock, ArrowRight,
 } from 'lucide-react'
 import { formatEUR } from '../../data/cars.js'
+import { api } from '../../api/client.js'
 import './KycGate.css'
 
 /*
@@ -21,18 +22,46 @@ const STEPS = [
   { id: 'payment', icon: CreditCard, title: 'Carte & solvabilité', hint: 'Empreinte bancaire, aucun débit' },
 ]
 
-export default function KycGate({ car, total, onClose, onComplete }) {
+const fmtDate = (d) =>
+  d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—'
+
+export default function KycGate({ car, total, range, onClose, onComplete }) {
   const [step, setStep] = useState(0)
   const [done, setDone] = useState(false)
+  const [busy, setBusy] = useState(false)
+  // Identifiants renvoyés par l'API (best-effort : l'UI fonctionne même hors-ligne).
+  const ctx = useRef({ userId: null, sessionId: null })
   const isLast = step === STEPS.length - 1
   const current = STEPS[step]
 
-  const next = () => {
+  // Synchronise l'étape courante avec l'API sans bloquer le parcours.
+  async function syncStep() {
+    try {
+      if (current.id === 'account') {
+        const { user } = await api.register(`demo+${Date.now()}@asphalt.app`)
+        ctx.current.userId = user.id
+        const { session } = await api.startKyc(user.id)
+        ctx.current.sessionId = session.id
+      } else if (ctx.current.sessionId) {
+        await api.submitDoc(ctx.current.sessionId, current.id, {})
+      }
+    } catch {
+      /* API absente : on continue en mode démo */
+    }
+  }
+
+  const next = async () => {
+    setBusy(true)
+    await syncStep()
     if (isLast) {
+      try {
+        if (ctx.current.sessionId) await api.evaluateKyc(ctx.current.sessionId)
+      } catch { /* noop */ }
       setDone(true)
     } else {
       setStep((s) => s + 1)
     }
+    setBusy(false)
   }
 
   const deposit = Math.round(total * 0.3)
@@ -70,6 +99,12 @@ export default function KycGate({ car, total, onClose, onComplete }) {
                 Une vérification unique, sécurisée et réutilisable pour toutes vos
                 prochaines locations sur ASPHALT.
               </p>
+              {range?.start && range?.end && (
+                <p className="gate__dates">
+                  <ShieldCheck size={14} aria-hidden="true" />
+                  Du {fmtDate(range.start)} au {fmtDate(range.end)} · {formatEUR(total)}
+                </p>
+              )}
             </div>
 
             {/* progression */}
@@ -121,9 +156,9 @@ export default function KycGate({ car, total, onClose, onComplete }) {
               <p className="gate__secure text-muted">
                 <ShieldCheck size={14} aria-hidden="true" /> Données chiffrées · conformes RGPD
               </p>
-              <button className="btn btn--primary" onClick={next}>
-                {isLast ? 'Valider mon dossier' : 'Continuer'}
-                <ArrowRight size={16} aria-hidden="true" />
+              <button className="btn btn--primary" onClick={next} disabled={busy}>
+                {busy ? 'Vérification…' : isLast ? 'Valider mon dossier' : 'Continuer'}
+                {!busy && <ArrowRight size={16} aria-hidden="true" />}
               </button>
             </div>
           </>
