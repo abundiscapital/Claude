@@ -1,0 +1,203 @@
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--asph-scrim);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--sp-4);
+}
+@media (min-width: 640px) {
+  .gate {
+    align-items: center;
+  }
+}
+
+.gate__panel {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: var(--asph-bg-elevated);
+  border: 1px solid var(--asph-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-6);
+}
+
+.gate__close {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border);
+  color: var(--asph-text-muted);
+  transition: all var(--dur) var(--ease-out);
+}
+.gate__close:hover {
+  color: var(--asph-text);
+  background: var(--asph-surface-hover);
+}
+
+.gate__head {
+  margin-bottom: var(--sp-5);
+  padding-right: var(--sp-8);
+}
+.gate__title {
+  font-size: var(--fs-24);
+  margin-block: var(--sp-2) var(--sp-3);
+}
+
+.gate__steps {
+  list-style: none;
+  display: flex;
+  gap: var(--sp-2);
+  padding: 0;
+  margin-bottom: var(--sp-5);
+}
+.gate__dot {
+  flex: 1;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border);
+  color: var(--asph-text-faint);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  transition: all var(--dur) var(--ease-out);
+}
+.gate__dot.is-active {
+  border-color: var(--asph-red);
+  color: var(--asph-text);
+  background: rgba(209, 31, 51, 0.12);
+}
+.gate__dot.is-done {
+  border-color: transparent;
+  background: var(--asph-success);
+  color: #fff;
+}
+
+.gate__body {
+  text-align: center;
+  padding: var(--sp-5) 0;
+}
+.gate__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--sp-4);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border-strong);
+  color: var(--asph-trust);
+}
+.gate__step-title {
+  font-size: var(--fs-18);
+}
+
+.gate__drop {
+  margin-top: var(--sp-5);
+  text-align: left;
+}
+.gate__form {
+  display: grid;
+  gap: var(--sp-3);
+}
+.gate__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+.gate__form input,
+.gate__upload {
+  width: 100%;
+  background: var(--asph-surface);
+  border: 1px solid var(--asph-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--asph-text);
+  padding: 14px 16px;
+  min-height: 50px;
+  transition: border-color var(--dur) var(--ease-out);
+}
+.gate__form input::placeholder {
+  color: var(--asph-text-faint);
+}
+.gate__form input:focus {
+  outline: none;
+  border-color: var(--asph-ring);
+}
+.gate__hint {
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+.gate__upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: var(--sp-6);
+  border-style: dashed;
+  cursor: pointer;
+}
+.gate__upload:hover {
+  border-color: var(--asph-trust);
+}
+.gate__upload-cta {
+  font-weight: 600;
+  color: var(--asph-text);
+}
+.gate__upload .text-muted {
+  font-size: var(--fs-12);
+}
+
+.gate__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--asph-border);
+  flex-wrap: wrap;
+}
+.gate__secure {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-12);
+}
+.gate__secure svg {
+  color: var(--asph-success);
+}
+
+.gate__success {
+  text-align: center;
+  padding: var(--sp-5) 0;
+}
+.gate__check {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--sp-5);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--asph-success);
+  color: #fff;
+}
+.gate__success .text-muted {
+  max-width: 42ch;
+  margin: var(--sp-3) auto var(--sp-6);
+}

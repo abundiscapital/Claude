@@ -1,0 +1,101 @@
+/*
+  ASPHALT — Design tokens
+  "Quiet money" : sombre, sobre, sport-luxe. Accents rouge & bleu.
+  Toutes les couleurs passent en tokens sémantiques — pas de hex en dur dans les composants.
+*/
+
+:root {
+  /* --- Surfaces (noir profond, jamais #000 pur) --- */
+  --asph-bg: #0b0b0f;
+  --asph-bg-elevated: #121218;
+  --asph-surface: #16161d;
+  --asph-surface-2: #1d1d26;
+  --asph-surface-hover: #23232e;
+  --asph-scrim: rgba(6, 6, 9, 0.72);
+
+  /* --- Texte --- */
+  --asph-text: #f4f4f6;
+  --asph-text-muted: #a7a7b4;
+  --asph-text-faint: #6f6f7d;
+
+  /* --- Bordures / dividers --- */
+  --asph-border: rgba(255, 255, 255, 0.08);
+  --asph-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* --- Accents marque : rouge sport & bleu nuit --- */
+  --asph-red: #d11f33;
+  --asph-red-bright: #ec2740;
+  --asph-red-deep: #7c0f1d;
+  --asph-blue: #2f6bff;
+  --asph-blue-bright: #4f86ff;
+  --asph-blue-deep: #0e2452;
+
+  /* --- Sémantique --- */
+  --asph-primary: var(--asph-red);
+  --asph-primary-hover: var(--asph-red-bright);
+  --asph-on-primary: #ffffff;
+  --asph-trust: var(--asph-blue);
+  --asph-success: #2faa6a;
+  --asph-warning: #d8a23a;
+  --asph-danger: #e0394b;
+  --asph-ring: var(--asph-blue-bright);
+
+  /* --- Halo / faisceau lumineux signature --- */
+  --asph-beam: rgba(79, 134, 255, 0.55);
+  --asph-glow-red: rgba(209, 31, 51, 0.35);
+
+  /* --- Typographie --- */
+  --asph-font-display: 'Bodoni Moda', 'Times New Roman', serif;
+  --asph-font-body: 'Jost', system-ui, -apple-system, sans-serif;
+
+  /* --- Échelle typographique --- */
+  --fs-12: 0.75rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-24: 1.5rem;
+  --fs-32: 2rem;
+  --fs-48: 3rem;
+  --fs-64: 4rem;
+
+  /* --- Espacement (rythme 4/8) --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-8: 48px;
+  --sp-10: 64px;
+  --sp-12: 96px;
+
+  /* --- Rayons --- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* --- Élévation --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.6);
+  --shadow-glow-red: 0 10px 40px rgba(209, 31, 51, 0.25);
+
+  /* --- Layout --- */
+  --container: 1240px;
+  --nav-h: 72px;
+
+  /* --- z-index --- */
+  --z-base: 0;
+  --z-sticky: 40;
+  --z-nav: 60;
+  --z-overlay: 100;
+  --z-modal: 1000;
+
+  /* --- Motion (luxe = courbes lentes, jamais brusque) --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur-fast: 180ms;
+  --dur: 280ms;
+  --dur-slow: 480ms;
+}
