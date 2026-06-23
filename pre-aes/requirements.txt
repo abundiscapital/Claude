@@ -1,0 +1,2 @@
+# Aucune dépendance externe : l'outil n'utilise que la bibliothèque standard de Python 3.8+.
+# Il suffit donc de :  python app.py

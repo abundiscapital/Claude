@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pré-AES — Pré-diagnostic environnemental de site</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{ --vert:#14532d; --vert2:#166534; --vert3:#15803d; --bg:#f6f8f6;
+         --ok:#16a34a; --part:#d97706; --indispo:#9ca3af; --terrain:#2563eb; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+        color:#1f2937; background:var(--bg); }
+  header{ background:var(--vert); color:#fff; padding:18px 22px; }
+  header h1{ margin:0; font-size:20px; }
+  header p{ margin:4px 0 0; opacity:.85; font-size:13px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:18px 22px; }
+  .search{ display:flex; gap:8px; margin:18px 0; }
+  .search input{ flex:1; padding:12px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:15px; }
+  .search button{ padding:12px 20px; border:0; border-radius:8px; background:var(--vert2);
+        color:#fff; font-size:15px; cursor:pointer; }
+  .search button:hover{ background:var(--vert); }
+  .examples{ font-size:12px; color:#64748b; margin:-8px 0 10px; }
+  .examples a{ color:var(--vert3); cursor:pointer; text-decoration:underline; margin-right:10px; }
+  .layout{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media(max-width:880px){ .layout{ grid-template-columns:1fr; } }
+  #map{ height:420px; border-radius:10px; border:1px solid #e2e8f0; }
+  .panel{ background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:16px; }
+  .site-head{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  .gauge{ font-size:13px; color:#475569; }
+  .gauge b{ font-size:22px; color:var(--vert); }
+  .bar{ height:8px; background:#e5e7eb; border-radius:5px; overflow:hidden; margin-top:4px; width:160px; }
+  .bar>span{ display:block; height:100%; background:var(--vert3); }
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  @media(max-width:560px){ .cards{ grid-template-columns:1fr; } }
+  .card{ border:1px solid #e2e8f0; border-left:5px solid var(--indispo); border-radius:8px; padding:11px 13px; background:#fff; }
+  .card.ok{ border-left-color:var(--ok); }
+  .card.partiel{ border-left-color:var(--part); }
+  .card.terrain{ border-left-color:var(--terrain); background:#eff6ff; }
+  .card h3{ margin:0 0 4px; font-size:14px; }
+  .badge{ float:right; font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; color:#fff; background:var(--indispo); }
+  .badge.ok{ background:var(--ok);} .badge.partiel{ background:var(--part);} .badge.terrain{ background:var(--terrain); }
+  .meta{ font-size:11px; color:#64748b; margin:2px 0 7px; }
+  .item{ display:flex; justify-content:space-between; gap:8px; font-size:13px; padding:2px 0; border-bottom:1px dotted #eef2f7; }
+  .item b{ font-weight:600; color:#334155; }
+  .note{ font-size:11.5px; color:#7c5b16; background:#fef9c3; border-radius:6px; padding:6px 8px; margin-top:7px; }
+  .card.terrain .note{ color:#1e40af; background:#dbeafe; }
+  .toolbar{ display:flex; gap:8px; margin:14px 0 4px; }
+  .toolbar button{ padding:8px 14px; border:1px solid #cbd5e1; background:#fff; border-radius:8px; cursor:pointer; font-size:13px; }
+  .loading{ text-align:center; padding:40px; color:#64748b; }
+  .err{ background:#fee2e2; color:#991b1b; padding:12px; border-radius:8px; }
+  footer{ font-size:11px; color:#94a3b8; text-align:center; padding:20px; }
+  @media print{ header,.search,.examples,.toolbar,#map-col{ display:none; } .layout{ display:block; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 Pré-AES — Pré-diagnostic environnemental de site</h1>
+  <p>Agrégation open data (BAN · Géorisques · IGN · PVGIS · GBIF · Open-Meteo · OSM) — prototype de thèse MS ECHD / Ekkoia</p>
+</header>
+
+<div class="wrap">
+  <div class="search">
+    <input id="adresse" placeholder="Saisir une adresse (ex. : 1 rue de Rivoli, Paris)"
+           onkeydown="if(event.key==='Enter')lancer()">
+    <button onclick="lancer()">Analyser le site</button>
+  </div>
+  <div class="examples">Exemples :
+    <a onclick="ex('2 Rue Saint-Dominique, 75007 Paris')">Paris 7e</a>
+    <a onclick="ex('Place de la Comédie, Montpellier')">Montpellier</a>
+    <a onclick="ex('1 Esplanade Charles de Gaulle, Nanterre')">Nanterre (92)</a>
+    &nbsp;|&nbsp; <a onclick="demo()">▶ Voir une démonstration (hors-ligne)</a>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<footer>
+  Prototype académique — données open data sous licences respectives. Un pré-diagnostic ne se
+  substitue pas à l'analyse d'un expert ni à la visite de site.
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let map, layer;
+function ex(a){ document.getElementById('adresse').value=a; lancer(); }
+function demo(){ go('/api/diagnostic?demo=1'); }
+function lancer(){
+  const adresse = document.getElementById('adresse').value.trim();
+  if(!adresse) return;
+  go('/api/diagnostic?adresse='+encodeURIComponent(adresse));
+}
+
+async function go(url){
+  const R = document.getElementById('result');
+  R.innerHTML = '<div class="loading">⏳ Interrogation des bases open data…</div>';
+  try{
+    const rep = await fetch(url);
+    const d = await rep.json();
+    if(d.erreur){ R.innerHTML = '<div class="err">⚠️ '+d.erreur+'</div>'; return; }
+    render(d);
+  }catch(e){
+    R.innerHTML = '<div class="err">⚠️ Erreur réseau : '+e.message+'</div>';
+  }
+}
+
+function render(d){
+  const s = d.site;
+  const R = document.getElementById('result');
+  const banner = d.demo ? '<div class="err" style="background:#fef3c7;color:#92400e">▶ Mode DÉMONSTRATION — données fictives, à des fins d\'illustration uniquement.</div>' : '';
+  R.innerHTML = banner + `
+    <div class="layout">
+      <div id="map-col"><div id="map"></div></div>
+      <div class="panel">
+        <div class="site-head">
+          <div><strong>${s.adresse}</strong><br>
+            <span class="meta">${s.commune||''} ${s.cp||''} · INSEE ${s.insee||'-'} · ${s.lat.toFixed(5)}, ${s.lon.toFixed(5)}</span>
+          </div>
+          <div class="gauge">Complétude auto.<br><b>${d.completude}%</b>
+            <div class="bar"><span style="width:${d.completude}%"></span></div>
+            <span style="font-size:11px">${d.nb_couverts}/${d.nb_auto} thématiques</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button onclick="window.print()">🖨️ Exporter / Imprimer (PDF)</button>
+        </div>
+      </div>
+    </div>
+    <div class="cards">${d.themes.map(carte).join('')}</div>`;
+
+  // Carte Leaflet
+  map = L.map('map').setView([s.lat, s.lon], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
+  L.marker([s.lat, s.lon]).addTo(map).bindPopup('Site analysé').openPopup();
+  L.circle([s.lat, s.lon], {radius:400, color:'#15803d', fillOpacity:.05}).addTo(map);
+  d.themes.forEach(t => (t.points||[]).forEach(p => {
+    if(p.lat && p.lon) L.circleMarker([p.lat,p.lon],{radius:5,color:'#2563eb'}).addTo(map).bindPopup(p.label||'');
+  }));
+}
+
+function carte(t){
+  const cls = t.statut==='ok'?'ok':t.statut==='partiel'?'partiel':t.statut==='terrain'?'terrain':'';
+  const lbl = {ok:'AUTO',partiel:'PARTIEL',terrain:'TERRAIN',indisponible:'INDISPO'}[t.statut]||'';
+  const items = (t.items||[]).map(i=>`<div class="item"><b>${i.label}</b><span>${i.valeur}</span></div>`).join('');
+  const lien = t.lien?` · <a href="${t.lien}" target="_blank">source</a>`:'';
+  return `<div class="card ${cls}">
+      <span class="badge ${cls}">${lbl}</span>
+      <h3>${t.titre}</h3>
+      <div class="meta">Fiabilité : ${t.fiabilite} · ${t.source}${lien} · consulté le ${t.date}</div>
+      ${items}
+      ${t.note?`<div class="note">${t.note}</div>`:''}
+    </div>`;
+}
+</script>
+</body>
+</html>
